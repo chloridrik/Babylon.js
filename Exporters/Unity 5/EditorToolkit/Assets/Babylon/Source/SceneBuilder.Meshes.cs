@@ -296,9 +296,13 @@ namespace Unity3D2Babylon
                         BabylonMultiMaterial bMultiMat;
 
                         string multiMatName = "";
+                        string materialPath;
+                        string materialGUID;
                         for (int i = 0; i < renderer.sharedMaterials.Length; i++)
                         {
-                            multiMatName += renderer.sharedMaterials[i].name;
+                            materialPath = AssetDatabase.GetAssetPath(renderer.sharedMaterials[i]);
+                            materialGUID =  AssetDatabase.AssetPathToGUID(materialPath);
+                            multiMatName += materialGUID;
                         }
                     
 

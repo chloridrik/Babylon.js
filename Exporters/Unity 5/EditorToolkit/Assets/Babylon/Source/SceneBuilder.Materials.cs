@@ -317,7 +317,10 @@ namespace Unity3D2Babylon
         private BabylonMaterial DumpStandardMaterial(Material material, int lightmapIndex = -1, Vector4 lightmapScaleOffset = default(Vector4), int lightmapCoordIndex = -1)
         {
             var materialNotSupported = false;
-            if (!materialsDictionary.ContainsKey(material.name))
+            string materialPath = AssetDatabase.GetAssetPath(material);
+            string materialGUID =  AssetDatabase.AssetPathToGUID(materialPath);
+            
+            if (!materialsDictionary.ContainsKey(materialGUID))
             {
                 var bMat = new BabylonStandardMaterial
                 {
@@ -434,18 +437,21 @@ namespace Unity3D2Babylon
                         bMat.lightmapTexture.vOffset = lightmapScaleOffset.w;
                     }
                 }
-                materialsDictionary.Add(bMat.name, bMat);
+                materialsDictionary.Add(materialGUID, bMat);
                 return bMat;
             }
-            return materialsDictionary[material.name];
+            return materialsDictionary[materialGUID];
         }
 
         private BabylonMaterial DumpPBRMaterial(Material material, int lightmapIndex = -1, Vector4 lightmapScaleOffset = default(Vector4), bool metallic = true, int lightmapCoordIndex = -1)
         {
             var materialNotSupported = false;
-            if (materialsDictionary.ContainsKey(material.name))
+            string materialPath = AssetDatabase.GetAssetPath(material);
+            string materialGUID =  AssetDatabase.AssetPathToGUID(materialPath);
+            
+            if (materialsDictionary.ContainsKey(materialGUID))
             {
-                return materialsDictionary[material.name];
+                return materialsDictionary[materialGUID];
             }
 
             var babylonPbrMaterial = new BabylonPBRMaterial
@@ -537,7 +543,7 @@ namespace Unity3D2Babylon
                     babylonPbrMaterial.lightmapTexture.vOffset = lightmapScaleOffset.w;
                 }
             }
-            materialsDictionary.Add(babylonPbrMaterial.name, babylonPbrMaterial);
+            materialsDictionary.Add(materialGUID, babylonPbrMaterial);
             return babylonPbrMaterial;
         }
 
