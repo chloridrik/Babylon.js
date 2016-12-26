@@ -448,6 +448,7 @@ namespace Unity3D2Babylon
             var materialNotSupported = false;
             string materialPath = AssetDatabase.GetAssetPath(material);
             string materialGUID =  AssetDatabase.AssetPathToGUID(materialPath);
+
             
             if (materialsDictionary.ContainsKey(materialGUID))
             {
@@ -525,12 +526,15 @@ namespace Unity3D2Babylon
 
             // Lightmapping
             bool hasLightmap = (exportationOptions.ExportLightmaps && lightmapIndex >= 0 && lightmapIndex != 65535 && LightmapSettings.lightmaps.Length > lightmapIndex);
+            
             if (hasLightmap && babylonPbrMaterial.ambientTexture == null)
             {
+                
                 var lightmap = LightmapSettings.lightmaps[lightmapIndex].lightmapLight;
                 var texturePath = AssetDatabase.GetAssetPath(lightmap);
                 if (!String.IsNullOrEmpty(texturePath))
                 {
+                    materialGUID = Guid.NewGuid().ToString();
                     ExporterWindow.ReportProgress(1, "Dumping pbr material lightmap: " + lightmap.name);
                     babylonPbrMaterial.lightmapTexture = DumpTexture(lightmap, isLightmap: true);
                     babylonPbrMaterial.lightmapTexture.coordinatesIndex = (lightmapCoordIndex >= 0) ? lightmapCoordIndex : exportationOptions.DefaultCoordinatesIndex;
