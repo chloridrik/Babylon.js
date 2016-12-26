@@ -214,6 +214,7 @@
         private static _ALPHA_MULTIPLY = 4;
         private static _ALPHA_MAXIMIZED = 5;
         private static _ALPHA_ONEONE = 6;
+        private static _ALPHA_PREMULTIPLIED = 7;
 
         private static _DELAYLOADSTATE_NONE = 0;
         private static _DELAYLOADSTATE_LOADED = 1;
@@ -335,6 +336,10 @@
 
         public static get ALPHA_MAXIMIZED(): number {
             return Engine._ALPHA_MAXIMIZED;
+        }
+
+        public static get ALPHA_PREMULTIPLIED(): number {
+            return Engine._ALPHA_PREMULTIPLIED;
         }
 
         public static get DELAYLOADSTATE_NONE(): number {
@@ -527,14 +532,14 @@
             var renderToHalfFloat = this._canRenderToHalfFloatTexture();
 
             // GL
-            try {
-               this._gl = <WebGLRenderingContext>(canvas.getContext("webgl2", options) || canvas.getContext("experimental-webgl2", options));
-               if (this._gl) {
-                   this._webGLVersion = "2.0";
-               }
-            } catch (e) {
-               // Do nothing
-            }
+            // try {
+            //    this._gl = <WebGLRenderingContext>(canvas.getContext("webgl2", options) || canvas.getContext("experimental-webgl2", options));
+            //    if (this._gl) {
+            //        this._webGLVersion = "2.0";
+            //    }
+            // } catch (e) {
+            //    // Do nothing
+            // }
 
             if (!this._gl) {
                 if (!canvas) {
@@ -1859,6 +1864,10 @@
                 case Engine.ALPHA_DISABLE:
                     this._alphaState.alphaBlend = false;
                     break;
+                case Engine.ALPHA_PREMULTIPLIED:
+                    this._alphaState.setAlphaBlendFunctionParameters(this._gl.ONE, this._gl.ONE_MINUS_SRC_ALPHA, this._gl.ONE, this._gl.ONE_MINUS_SRC_ALPHA);
+                    this._alphaState.alphaBlend = true;
+                    break;
                 case Engine.ALPHA_COMBINE:
                     this._alphaState.setAlphaBlendFunctionParameters(this._gl.SRC_ALPHA, this._gl.ONE_MINUS_SRC_ALPHA, this._gl.ONE, this._gl.ONE);
                     this._alphaState.alphaBlend = true;
@@ -2152,6 +2161,11 @@
 
             this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, filters.mag);
             this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, filters.min);
+
+            if (generateMipMaps) {
+                this._gl.generateMipmap(this._gl.TEXTURE_2D);
+            }
+
             this._bindTextureDirectly(this._gl.TEXTURE_2D, null);
 
             texture.samplingMode = samplingMode;
@@ -3118,11 +3132,21 @@
         }
 
         private _canRenderToFloatTexture(): boolean {
-            return this._canRenderToTextureOfType(BABYLON.Engine.TEXTURETYPE_FLOAT, 'OES_texture_float');
+            try {
+                return this._canRenderToTextureOfType(BABYLON.Engine.TEXTURETYPE_FLOAT, 'OES_texture_float');
+            }
+            catch (e) {
+                return false;
+            }
         }
 
-        private _canRenderToHalfFloatTexture(): boolean {
-            return this._canRenderToTextureOfType(BABYLON.Engine.TEXTURETYPE_HALF_FLOAT, 'OES_texture_half_float');
+        private _canRenderToHalfFloatTexture(): boolean {            
+            try {
+                return this._canRenderToTextureOfType(BABYLON.Engine.TEXTURETYPE_HALF_FLOAT, 'OES_texture_half_float');
+            }
+            catch (e) {
+                return false;
+            }
         }
 
         // Thank you : http://stackoverflow.com/questions/28827511/webgl-ios-render-to-floating-point-texture
